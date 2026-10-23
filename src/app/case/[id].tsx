@@ -53,7 +53,7 @@ function Field({ label, hint, value, onChange }: { label: string; hint: string; 
         onChangeText={onChange}
         placeholder="MM/DD/YYYY"
         keyboardType="numbers-and-punctuation"
-        className="rounded-xl border border-border bg-surface px-4 py-3 text-base leading-none text-foreground"
+        className="rounded-xl border border-border bg-surface px-4 text-base leading-none h-12 text-foreground"
         placeholderTextColor={muted}
       />
     </View>
