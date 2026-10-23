@@ -28,12 +28,24 @@
 @layer theme {
   :root {
     @variant light {
-      --accent: oklch(0.66 0.26 325);
+      --background: oklch(0.97 0.006 235);
+      --foreground: oklch(0.24 0.04 258);
+      --surface: oklch(0.995 0.002 235);
+      --muted: oklch(0.5 0.03 250);
+      --accent: oklch(0.5 0.09 215);
       --accent-foreground: oklch(0.99 0 0);
+      --warning: oklch(0.78 0.15 75);
+      --success: oklch(0.58 0.11 165);
     }
     @variant dark {
-      --accent: oklch(0.72 0.22 325);
-      --accent-foreground: oklch(0.16 0 0);
+      --background: oklch(0.2 0.035 258);
+      --foreground: oklch(0.95 0.01 235);
+      --surface: oklch(0.26 0.035 258);
+      --muted: oklch(0.72 0.03 245);
+      --accent: oklch(0.78 0.1 210);
+      --accent-foreground: oklch(0.2 0.03 258);
+      --warning: oklch(0.8 0.14 75);
+      --success: oklch(0.72 0.12 165);
     }
   }
 }
@@ -53,5 +65,5 @@
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-serif: Georgia, "Times New Roman", serif;
 }

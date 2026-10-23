@@ -30,12 +30,17 @@ export default function AppTabs() {
     <NativeTabs backgroundColor={colors.background} tintColor={accent}>
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
+        <NativeTabs.Trigger.Icon sf="building.columns.fill" md="account_balance" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore" disableAutomaticContentInsets>
-        <NativeTabs.Trigger.Label>Explore</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="safari.fill" md="explore" />
+      <NativeTabs.Trigger name="cases" disableAutomaticContentInsets>
+        <NativeTabs.Trigger.Label>Cases</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="folder.fill" md="folder" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="resources" disableAutomaticContentInsets>
+        <NativeTabs.Trigger.Label>Help</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="lifepreserver.fill" md="support" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

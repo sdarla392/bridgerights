@@ -1,7 +1,7 @@
 import '@/global.css';
 
 import Constants from 'expo-constants';
-import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { HeroUINativeProvider } from 'heroui-native';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -86,8 +86,8 @@ export default function RootLayout() {
               {/* The scaffold boots straight into src/app/index.tsx (the Newly welcome
                   screen), no tab bar. src/components/app-tabs.tsx is the NativeTabs
                   reference: when the app has tab routes, render <AppTabs /> here
-                  instead of <Slot /> (explore.tsx is its second tab). */}
-              <Slot />
+                  instead of <Stack screenOptions={{ headerShown: false }} /> (explore.tsx is its second tab). */}
+              <Stack screenOptions={{ headerShown: false }} />
             </ThemeSwitchHost>
           </ThemeProvider>
         </HeroUINativeProvider>
