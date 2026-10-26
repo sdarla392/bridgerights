@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, useThemeColor } from 'heroui-native';
 import { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Linking, Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Presets } from 'react-native-pulsar';
 
@@ -42,6 +42,12 @@ const NOTICE_INFO: Record<string, { title: string; body: string }> = {
     body: 'Look for any paper, letter or posted sheet from your landlord. If you find one, add its details in the Notice tab. If you are unsure whether something counts, ask a tenant counselor.',
   },
 };
+
+const COUNSELORS = [
+  { name: 'Law Foundation of Silicon Valley', note: 'Free legal help for lower-income renters in Santa Clara County', phone: '(408) 280-2424' },
+  { name: 'Project Sentinel', note: 'Tenant counseling and landlord-tenant mediation', phone: '(408) 720-9888' },
+  { name: '211 Santa Clara County', note: 'Free referrals to housing help, any time', phone: '211' },
+];
 
 const CHECK_LABEL: Record<CheckState, string> = {
   present: 'Found in the notice',
@@ -96,7 +102,7 @@ export default function CaseScreen() {
     );
   }
 
-  const findings = evaluate(c.facts);
+  const findings = evaluate(c.facts).filter((f) => f.applicability !== 'not_applicable');
   const coverage = coverageFor(c.facts.city);
   const unknowns = Array.from(new Set(findings.flatMap((f) => f.unresolved)));
   const deadlines = computeDeadlines(c.facts);
@@ -237,6 +243,21 @@ export default function CaseScreen() {
                 <Text className="text-sm text-muted">{d.trace}</Text>
               </Card>
             ))}
+          </Section>
+          <Section title="Talk to a counselor">
+            <Card>
+              {COUNSELORS.map((k) => (
+                <Pressable key={k.name} onPress={() => Linking.openURL(`tel:${k.phone.replace(/[^0-9]/g, '')}`)} accessibilityLabel={`Call ${k.name}`} className="flex-row items-center gap-3 py-1">
+                  <View className="flex-1 gap-0.5">
+                    <Text className="text-base font-semibold text-foreground">{k.name}</Text>
+                    <Text className="text-sm text-muted">{k.note}</Text>
+                    <Text className="text-base font-semibold text-accent">{k.phone}</Text>
+                  </View>
+                  <Ionicons name="call" size={22} color={accent} />
+                </Pressable>
+              ))}
+              <Text className="text-xs text-muted">These serve the whole county. Phone numbers can change, so check the Help tab if a call does not connect.</Text>
+            </Card>
           </Section>
           <Button variant="danger-soft" onPress={() => confirmDelete({ title: 'Delete this case?', message: 'This removes it from this phone.', onConfirm: () => { deleteCase(c.id); router.replace('/'); } })}>
             <Button.Label>Delete case</Button.Label>
