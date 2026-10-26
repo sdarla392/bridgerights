@@ -9,6 +9,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { Newly } from '@newly/sdk-react-native';
 
 import { ThemeSwitchHost } from '@/components/theme-switch-host';
+import { authClient } from '@/lib/auth';
 import { hideExpoDeveloperUi } from '@/lib/dev-menu';
 import generatedAnalytics from '@/lib/newly-analytics.json';
 
@@ -75,6 +76,9 @@ if (analytics.enabled !== false && newlyIngestKey && newlyApiUrl) {
 // native module set is fixed up front and screen work hot-reloads without a native rebuild.
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { data: session, isPending } = authClient.useSession();
+  const signedIn = Boolean(session?.user && !session.user.isAnonymous);
+  if (isPending) return null;
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
@@ -86,8 +90,22 @@ export default function RootLayout() {
               {/* The scaffold boots straight into src/app/index.tsx (the Newly welcome
                   screen), no tab bar. src/components/app-tabs.tsx is the NativeTabs
                   reference: when the app has tab routes, render <AppTabs /> here
-                  instead of <Stack screenOptions={{ headerShown: false }} /> (explore.tsx is its second tab). */}
-              <Stack screenOptions={{ headerShown: false }} />
+                  instead of <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Protected guard={signedIn}>
+                  <Stack.Screen name="(tabs)" />
+                </Stack.Protected>
+                <Stack.Protected guard={!signedIn}>
+                  <Stack.Screen name="welcome" />
+                </Stack.Protected>
+              </Stack> (explore.tsx is its second tab). */}
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Protected guard={signedIn}>
+                  <Stack.Screen name="(tabs)" />
+                </Stack.Protected>
+                <Stack.Protected guard={!signedIn}>
+                  <Stack.Screen name="welcome" />
+                </Stack.Protected>
+              </Stack>
             </ThemeSwitchHost>
           </ThemeProvider>
         </HeroUINativeProvider>

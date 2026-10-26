@@ -1,19 +1,13 @@
 import { router } from 'expo-router';
-import { Button } from 'heroui-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useThemeColor } from 'heroui-native';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Card } from '@/components/card';
-import { ListRow } from '@/components/list-row';
-import { pressHaptic } from '@/components/pressable';
+import { Pressable } from '@/components/pressable';
 import { Section } from '@/components/section';
 import { useCasesStore } from '@/features/cases/store/cases-store';
-import { reasonLabel, cityName } from '@/features/cases/utils/summary';
-
-const HOW = [
-  { title: 'Answer a few questions', body: 'Say where you live and what happened. Skip anything with “I don’t know”.' },
-  { title: 'Read what may apply', body: 'See protections in plain words, and what to ask a counselor.' },
-  { title: 'Work through your steps', body: 'Tick off tasks and watch the bridge fill as you go.' },
-];
+import { authClient } from '@/lib/auth';
 
 function SpanArt() {
   return (
@@ -32,56 +26,58 @@ function SpanArt() {
   );
 }
 
+function HubBox({ accent, icon, title, body, onPress }: { accent: string; icon: keyof typeof Ionicons.glyphMap; title: string; body: string; onPress: () => void }) {
+  return (
+    <Card>
+      <Pressable onPress={onPress} accessibilityRole="button" className="flex-row items-center gap-4">
+        <View className="size-12 items-center justify-center rounded-2xl bg-accent/10">
+          <Ionicons name={icon} size={24} color={accent} />
+        </View>
+        <View className="flex-1 gap-0.5">
+          <Text className="text-base font-semibold text-foreground">{title}</Text>
+          <Text className="text-sm text-muted">{body}</Text>
+        </View>
+      </Pressable>
+    </Card>
+  );
+}
+
 export default function HomeScreen() {
+  const accent = useThemeColor('accent');
+  const { data: session } = authClient.useSession();
   const cases = useCasesStore((s) => s.cases);
-  const latest = cases[0];
+  const pending = cases.flatMap((c) => c.tasks.filter((t) => !t.done).map((t) => ({ ...t, caseId: c.id })));
+  const first = session?.user?.name?.split(' ')[0] ?? '';
   return (
     <ScrollView
       className="flex-1 bg-background"
       contentContainerClassName="px-5 pt-safe-offset-6 pb-safe-offset-22 gap-6"
       showsVerticalScrollIndicator={false}>
-      <View className="gap-4">
+      <View className="gap-3">
         <Text className="text-sm font-semibold text-accent">BridgeRights · Santa Clara County</Text>
-        <Text className="font-serif text-4xl font-bold leading-tight text-foreground">Understand my housing situation.</Text>
-        <Text className="text-base text-muted">
-          Answer a few questions, see which tenant protections may apply, check your notice, and keep track of every step.
-        </Text>
+        <Text className="font-serif text-4xl font-bold leading-tight text-foreground">{first ? `Welcome back, ${first}` : 'Welcome back'}</Text>
         <SpanArt />
       </View>
 
       <View className="gap-3">
-        <Button
-          size="lg"
-          onPress={() => {
-            pressHaptic();
-            router.push('/check');
-          }}>
-          <Button.Label>Start a new case</Button.Label>
-        </Button>
-        {latest ? (
-          <Button
-            size="lg"
-            variant="secondary"
-            onPress={() => {
-              pressHaptic();
-              router.push(`/case/${latest.id}`);
-            }}>
-            <Button.Label>{`Resume: ${cityName(latest.facts.city)}, ${reasonLabel(latest.facts.reason).toLowerCase()}`}</Button.Label>
-          </Button>
-        ) : null}
+        <HubBox accent={accent} icon="chatbubbles-outline" title="Counselor" body="Ask the AI chatbot a question in plain words" onPress={() => router.push('/ask')} />
+        <HubBox accent={accent} icon="home-outline" title="Your housing case" body={cases.length ? 'Open your rights, notice and plan' : 'Check your rights and start a plan'} onPress={() => router.push(cases[0] ? `/case/${cases[0].id}` : '/check')} />
+        <HubBox accent={accent} icon="map-outline" title="Relocation services" body="Relocation Matchmaker: homes that fit your household, with a Stability Score" onPress={() => router.push('/matchmaker')} />
       </View>
 
-      <Section title="How to use this app">
+      <Section title="Upcoming">
         <Card>
-          {HOW.map((h, i) => (
-            <View key={h.title} className="flex-row items-start gap-3">
-              <Text className="w-6 font-serif text-xl font-bold text-accent">{i + 1}</Text>
-              <View className="flex-1 gap-0.5">
-                <Text className="text-base font-semibold text-foreground">{h.title}</Text>
-                <Text className="text-sm text-muted">{h.body}</Text>
-              </View>
-            </View>
-          ))}
+          <Text className="text-base font-semibold text-foreground">{pending.length ? `Tasks pending (${pending.length})` : 'Tasks pending'}</Text>
+          {pending.length ? (
+            pending.slice(0, 4).map((t) => (
+              <Pressable key={t.id} onPress={() => router.push(`/case/${t.caseId}`)} className="flex-row items-center gap-3 py-1">
+                <View className="size-2 rounded-full bg-accent" />
+                <Text className="flex-1 text-sm text-foreground" numberOfLines={2}>{t.title}</Text>
+              </Pressable>
+            ))
+          ) : (
+            <Text className="text-sm text-muted">Nothing pending. Start a case and your steps will appear here.</Text>
+          )}
         </Card>
       </Section>
 
@@ -91,9 +87,6 @@ export default function HomeScreen() {
           BridgeRights is not a lawyer or a court, and it never says you will or will not win. Your case stays on your phone unless you ask the AI helper a question.
         </Text>
       </Card>
-
-      <ListRow title="Ask a question" subtitle="An AI helper answers in plain words" onPress={() => router.push('/ask')} />
-      <ListRow title="Browse tenant resources" subtitle="Legal aid, counselors, official guides" onPress={() => router.push('/resources')} />
     </ScrollView>
   );
 }
