@@ -15,7 +15,7 @@ export class AskError extends Error {
 
 // An anonymous sign-in gives the app a private, nameless identity so the AI route can
 // be called without the person creating an account.
-async function refreshToken(): Promise<string> {
+export async function refreshToken(): Promise<string> {
   tokenStorage.deleteItem(BEARER_TOKEN_KEY);
   let session = await authClient.getSession();
   if (!session.data) {

@@ -8,6 +8,13 @@ export interface Needs {
   familiarPlaceId: string;
   needsStepFree: boolean;
   dailyCare: boolean;
+  types: string[];
+  pets: boolean;
+  parking: boolean;
+  laundry: boolean;
+  transit: boolean;
+  minBaths: number;
+  maxCommuteMin: number;
 }
 
 export interface Factor {
@@ -56,6 +63,20 @@ export function scoreListing(l: Listing, n: Needs): Match {
   const familiarKm = km(l.placeId, n.familiarPlaceId);
   const community = clamp(100 - ((familiarKm - 5) / 25) * 100);
 
+  const wants: [boolean, boolean, string][] = [
+    [n.pets, l.pets, 'pets allowed'],
+    [n.parking, l.parking, 'parking'],
+    [n.laundry, l.laundry, 'laundry in the home'],
+    [n.transit, l.transit, 'near transit'],
+    [n.minBaths > 0, l.baths >= n.minBaths, `${n.minBaths}+ bathrooms`],
+    [n.types.length > 0, n.types.includes(l.type), `a ${n.types.join(' or ')}`],
+  ];
+  const asked = wants.filter((w) => w[0]);
+  const met = asked.filter((w) => w[1]);
+  const missing = asked.filter((w) => !w[1]).map((w) => w[2]);
+  const musts = asked.length ? clamp((met.length / asked.length) * 100) : 100;
+  const commuteLimit = commuteMin > n.maxCommuteMin;
+
   const factors: Factor[] = [
     {
       id: 'cost',
@@ -76,7 +97,7 @@ export function scoreListing(l: Listing, n: Needs): Match {
       label: 'Commute',
       score: commute,
       weight: n.dailyCare ? 25 : 15,
-      note: `Roughly ${Math.round(commuteMin)} minutes each way to ${placeById(n.workPlaceId).name}. This is an estimate from distance, not live traffic.`,
+      note: `${commuteLimit ? 'Over your limit. ' : ''}Roughly ${Math.round(commuteMin)} minutes each way to ${placeById(n.workPlaceId).name}. This is an estimate from distance, not live traffic.`,
     },
     {
       id: 'access',
@@ -92,7 +113,15 @@ export function scoreListing(l: Listing, n: Needs): Match {
       weight: 15,
       note: `About ${Math.round(familiarKm)} km from ${placeById(n.familiarPlaceId).name}, where your community services are.`,
     },
+    {
+      id: 'musts',
+      label: 'Your must-haves',
+      score: musts,
+      weight: asked.length ? 20 : 0,
+      note: asked.length ? (missing.length ? `Missing: ${missing.join(', ')}.` : 'Has everything you asked for.') : 'You did not pick any extras.',
+    },
   ];
+  if (commuteLimit) factors[2].score = Math.min(factors[2].score, 20);
   const totalWeight = factors.reduce((s, f) => s + f.weight, 0);
   const score = Math.round(factors.reduce((s, f) => s + f.score * f.weight, 0) / totalWeight);
   return { listing: l, totalMonthly, transport, score, factors };
