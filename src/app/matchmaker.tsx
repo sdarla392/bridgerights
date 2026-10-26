@@ -223,7 +223,7 @@ function GoogleHomes({ placeId, kind }: { placeId: string; kind: 'apartment' | '
   const place = placeById(placeId);
   const load = async () => {
     setState('loading');
-    const r = await fetchGoogleHomes(place.lat, place.lng, kind);
+    const r = await fetchGoogleHomes(place.lat, place.lng, kind, place.name);
     if (!r.ok) return setState(r.reason);
     setPlaces(r.places);
     setState('done');

@@ -14,13 +14,13 @@ export interface GoogleHome {
 
 export type HomesResult = { ok: true; places: GoogleHome[] } | { ok: false; reason: 'not_configured' | 'unavailable' };
 
-export async function fetchGoogleHomes(lat: number, lng: number, kind: 'apartment' | 'house'): Promise<HomesResult> {
+export async function fetchGoogleHomes(lat: number, lng: number, kind: 'apartment' | 'house', city: string): Promise<HomesResult> {
   try {
     const token = await refreshToken();
     const res = await fetch(`${API_URL}/homes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ lat, lng, kind }),
+      body: JSON.stringify({ lat, lng, kind, city }),
     });
     if (res.status === 503) return { ok: false, reason: 'not_configured' };
     if (!res.ok) return { ok: false, reason: 'unavailable' };
