@@ -58,18 +58,28 @@ function HeatMap({ needs }: { needs: Needs }) {
   const maxLng = Math.max(...lngs);
   return (
     <Card>
-      <View className="h-64 w-full rounded-xl bg-accent/5">
+      <View className="h-72 w-full rounded-xl bg-accent/5">
         {fit.map((f) => {
           const p = placeById(f.placeId);
           const left = 8 + ((p.lng - minLng) / (maxLng - minLng)) * 78;
           const top = 6 + (1 - (p.lat - minLat) / (maxLat - minLat)) * 78;
           return (
-            <View key={f.placeId} className="absolute items-center" style={{ left: `${left}%`, top: `${top}%` }}>
-              <View className={cn('size-9 rounded-full', f.score === null ? 'bg-border' : tier(f.score))} style={{ opacity: f.score === null ? 0.6 : 0.35 + (f.score / 100) * 0.6 }} />
-              <Text className="text-[10px] text-foreground">{p.name}</Text>
+            <View
+              key={f.placeId}
+              className={cn('absolute size-6 items-center justify-center rounded-full', f.score === null ? 'bg-border' : tier(f.score))}
+              style={{ left: `${left}%`, top: `${top}%`, opacity: f.score === null ? 0.6 : 0.5 + (f.score / 100) * 0.5 }}>
+              <Text className="text-[9px] font-bold text-white">{f.score === null ? '–' : Math.round(f.score / 10)}</Text>
             </View>
           );
         })}
+      </View>
+      <View className="gap-1">
+        {fit.map((f) => (
+          <View key={f.placeId} className="flex-row items-center justify-between">
+            <Text className="text-sm text-foreground">{placeById(f.placeId).name}</Text>
+            <Text className="text-sm text-muted">{f.score === null ? 'No sample listing' : `Best fit ${f.score}`}</Text>
+          </View>
+        ))}
       </View>
       <Text className="text-sm text-muted">Green: strong fit for your needs. Amber: partial. Red: weak. Grey: no sample listing. A simple map from sample data, not a street map.</Text>
     </Card>
