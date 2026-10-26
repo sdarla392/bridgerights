@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from 'heroui-native';
+import { router } from 'expo-router';
 import { Linking, ScrollView, Text } from 'react-native';
 
 import { Card } from '@/components/card';
@@ -17,6 +18,7 @@ export default function ResourcesScreen() {
       showsVerticalScrollIndicator={false}>
       <Text className="font-serif text-3xl font-bold text-foreground">Help near you</Text>
       <Text className="text-base text-muted">If you have court papers or a deadline close by, contact one of these today.</Text>
+      <ListRow title="Ask the AI helper" subtitle="Get plain-words answers to any question" onPress={() => router.push('/ask')} />
       <Section title="Get support">
         <Card list>
           {RESOURCES.map((r) => (

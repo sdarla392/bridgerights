@@ -88,10 +88,11 @@ export default function HomeScreen() {
       <Card>
         <Text className="text-base font-semibold text-foreground">Information, not legal advice</Text>
         <Text className="text-sm text-muted">
-          BridgeRights is not a lawyer or a court, and it never says you will or will not win. Everything stays on your phone.
+          BridgeRights is not a lawyer or a court, and it never says you will or will not win. Your case stays on your phone unless you ask the AI helper a question.
         </Text>
       </Card>
 
+      <ListRow title="Ask a question" subtitle="An AI helper answers in plain words" onPress={() => router.push('/ask')} />
       <ListRow title="Browse tenant resources" subtitle="Legal aid, counselors, official guides" onPress={() => router.push('/resources')} />
     </ScrollView>
   );
