@@ -47,6 +47,8 @@ export default function AskScreen() {
       const answer = await askAssistant(question, context, history);
       setTurns((t) => [...t, { role: 'assistant', text: answer }]);
     } catch (e) {
+      setTurns(history);
+      setText(question);
       setError(FAILURE_TEXT[e instanceof AskError ? e.kind : 'unavailable']);
     } finally {
       setBusy(false);
@@ -73,7 +75,7 @@ export default function AskScreen() {
           <View className="gap-3">
             <Card>
               <Text className="text-sm text-muted">
-                This is an AI helper. It gives general information in plain words, not legal advice, and it can be wrong. It will never tell you to ignore a notice, stop paying rent or move out. Your question{latest ? ' and your case answers' : ''} are sent to an AI service to write a reply; do not share names or ID numbers.
+                This is an AI helper. It gives general information in plain words, not legal advice, and it can be wrong. It will never tell you to ignore a notice, stop paying rent or move out. What you type{latest ? ' and your case answers are' : ' is'} sent to an AI service to write a reply; do not share names or ID numbers.
               </Text>
             </Card>
             {turns.length === 0 ? (

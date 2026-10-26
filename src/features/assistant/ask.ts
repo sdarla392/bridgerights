@@ -16,9 +16,12 @@ export class AskError extends Error {
 // An anonymous sign-in gives the app a private, nameless identity so the AI route can
 // be called without the person creating an account.
 async function refreshToken(): Promise<string> {
-  const session = await authClient.getSession();
-  if (!session.data) await authClient.signIn.anonymous();
-  else await authClient.getSession();
+  tokenStorage.deleteItem(BEARER_TOKEN_KEY);
+  let session = await authClient.getSession();
+  if (!session.data) {
+    await authClient.signIn.anonymous();
+    session = await authClient.getSession();
+  }
   const token = tokenStorage.getItem(BEARER_TOKEN_KEY);
   if (!token) throw new AskError('unavailable');
   return token;
@@ -28,8 +31,12 @@ export async function askAssistant(question: string, context: string, history: T
   let token: string;
   try {
     token = await refreshToken();
-  } catch {
-    throw new AskError('offline');
+  } catch (e) {
+    try {
+      token = await refreshToken();
+    } catch {
+      throw e instanceof AskError ? e : new AskError('offline');
+    }
   }
   const requestId = `q${Date.now()}x${Math.random().toString(36).slice(2, 10)}`;
   let res: Response;
