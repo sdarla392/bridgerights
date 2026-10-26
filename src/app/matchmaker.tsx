@@ -231,19 +231,19 @@ function GoogleHomes({ placeId, kind }: { placeId: string; kind: 'apartment' | '
   return (
     <Card>
       <Text className="text-base font-semibold text-foreground">{`Real rental buildings near ${place.name}`}</Text>
-      <Text className="text-sm text-muted">From Google Maps. Google does not share rents or what is available, so call or visit to ask.</Text>
-      {state === 'not_configured' ? <Text className="text-sm text-danger">Google search is not switched on for this app yet.</Text> : null}
-      {state === 'unavailable' ? <Text className="text-sm text-danger">Could not load Google results. Try again.</Text> : null}
-      {state === 'done' && places.length === 0 ? <Text className="text-sm text-muted">Google found nothing here.</Text> : null}
+      <Text className="text-sm text-muted">From OpenStreetMap. It does not share rents or what is available, so call or visit to ask.</Text>
+      {state === 'not_configured' ? <Text className="text-sm text-danger">Building search is not available right now.</Text> : null}
+      {state === 'unavailable' ? <Text className="text-sm text-danger">Could not load buildings. Try again in a moment.</Text> : null}
+      {state === 'done' && places.length === 0 ? <Text className="text-sm text-muted">No named buildings found here on the map.</Text> : null}
       {places.map((g) => (
         <Pressable key={g.id} onPress={() => g.mapsUrl && Linking.openURL(g.mapsUrl)} accessibilityRole="link" className="gap-0.5 py-1">
           <Text className="text-sm font-semibold text-foreground">{g.name}</Text>
-          <Text className="text-sm text-muted">{g.address}</Text>
-          <Text className="text-xs text-accent">{g.rating ? `${g.rating.toFixed(1)} stars (${g.ratings} reviews) · Open in Google Maps` : 'Open in Google Maps'}</Text>
+          {g.address ? <Text className="text-sm text-muted">{g.address}</Text> : null}
+          <Text className="text-xs text-accent">See on the map</Text>
         </Pressable>
       ))}
       <Pressable onPress={load} accessibilityRole="button" className="h-11 items-center justify-center rounded-xl border border-border">
-        <Text className="text-sm font-semibold text-accent">{state === 'loading' ? 'Searching…' : state === 'done' ? 'Search again' : 'Find real buildings on Google'}</Text>
+        <Text className="text-sm font-semibold text-accent">{state === 'loading' ? 'Searching…' : state === 'done' ? 'Search again' : 'Find real buildings nearby'}</Text>
       </Pressable>
     </Card>
   );
