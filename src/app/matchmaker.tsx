@@ -56,19 +56,43 @@ function HeatMap({ needs }: { needs: Needs }) {
   const maxLat = Math.max(...lats);
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
+  const pos = PLACES.map((p) => ({
+    id: p.id,
+    x: 8 + ((p.lng - minLng) / (maxLng - minLng)) * 78,
+    y: 6 + (1 - (p.lat - minLat) / (maxLat - minLat)) * 78,
+  }));
+  for (let round = 0; round < 60; round++) {
+    for (let i = 0; i < pos.length; i++) {
+      for (let j = i + 1; j < pos.length; j++) {
+        const dx = pos[j].x - pos[i].x;
+        const dy = (pos[j].y - pos[i].y) * 0.8;
+        const d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        if (d >= 13) continue;
+        const push = (13 - d) / 2;
+        pos[i].x -= (dx / d) * push;
+        pos[j].x += (dx / d) * push;
+        pos[i].y -= ((dy / d) * push) / 0.8;
+        pos[j].y += ((dy / d) * push) / 0.8;
+      }
+    }
+    for (const q of pos) {
+      q.x = Math.max(2, Math.min(88, q.x));
+      q.y = Math.max(2, Math.min(88, q.y));
+    }
+  }
   return (
     <Card>
       <View className="h-72 w-full rounded-xl bg-accent/5">
         {fit.map((f) => {
-          const p = placeById(f.placeId);
-          const left = 8 + ((p.lng - minLng) / (maxLng - minLng)) * 78;
-          const top = 6 + (1 - (p.lat - minLat) / (maxLat - minLat)) * 78;
+          const q = pos.find((x) => x.id === f.placeId) ?? pos[0];
+          const left = q.x;
+          const top = q.y;
           return (
             <View
               key={f.placeId}
               className={cn('absolute size-6 items-center justify-center rounded-full', f.score === null ? 'bg-border' : tier(f.score))}
               style={{ left: `${left}%`, top: `${top}%`, opacity: f.score === null ? 0.6 : 0.5 + (f.score / 100) * 0.5 }}>
-              <Text className="text-[9px] font-bold text-white">{f.score === null ? '–' : Math.round(f.score / 10)}</Text>
+              <Text className="text-[9px] font-bold text-white">{f.score === null ? '–' : Math.min(9, Math.round(f.score / 10))}</Text>
             </View>
           );
         })}
