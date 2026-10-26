@@ -160,14 +160,18 @@ function HeatMap({ needs, selected, onSelect }: { needs: Needs; selected: string
   );
 }
 
-function MatchCard({ m }: { m: Match }) {
+function MatchCard({ m, rank }: { m: Match; rank?: number }) {
   const [open, setOpen] = useState(false);
   const place = placeById(m.listing.placeId);
+  const scored = m.factors.filter((f) => f.weight > 0);
+  const best = scored.reduce((a, b) => (b.score > a.score ? b : a), scored[0]);
+  const worst = scored.reduce((a, b) => (b.score < a.score ? b : a), scored[0]);
   return (
     <Card>
       <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" className="gap-2">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1 gap-0.5">
+            {rank ? <Text className="text-xs font-bold uppercase text-accent">{rank === 1 ? '#1 · Best fit' : `#${rank}`}</Text> : null}
             <Text className="text-base font-semibold text-foreground">{m.listing.title}</Text>
             <Text className="text-sm text-muted">{`${place.name} · ${m.listing.bedrooms === 0 ? 'Studio' : `${m.listing.bedrooms} bed`} · $${m.listing.rent.toLocaleString('en-US')} rent`}</Text>
             <Text className="text-sm text-muted">{`About $${Math.round(m.totalMonthly).toLocaleString('en-US')} a month in total`}</Text>
@@ -180,6 +184,7 @@ function MatchCard({ m }: { m: Match }) {
           </View>
         </View>
         <Text className="text-sm text-muted">{[m.listing.type, `${m.listing.baths} bath`, m.listing.pets ? 'pets ok' : null, m.listing.parking ? 'parking' : null, m.listing.laundry ? 'laundry' : null, m.listing.transit ? 'near transit' : null, m.listing.stepFree ? 'step-free' : null].filter(Boolean).join(' · ')}</Text>
+        <Text className="text-sm text-muted">{`Strongest: ${best.label} (${best.score}). Weakest: ${worst.label} (${worst.score}).`}</Text>
         <Text className="text-xs font-semibold text-accent">{open ? 'Hide why' : 'Why this score?'}</Text>
       </Pressable>
       {open ? (
@@ -365,20 +370,21 @@ export default function MatchmakerScreen() {
 
       {shown ? (
         <>
+          <Section title="Homes ranked by best fit">
+            <View className="gap-3">
+              <Text className="text-sm text-muted">{`${matches.length} sample homes, highest suitability score first. Tap a home to see why it scored that way.`}</Text>
+              {matches.map((m, i) => (
+                <MatchCard key={m.listing.id} m={m} rank={i + 1} />
+              ))}
+            </View>
+          </Section>
           <Section title="Bay Area fit map">
             <HeatMap needs={needs} selected={selected} onSelect={setSelected} />
           </Section>
           <Section title={`Homes in ${placeById(selected).name}`}>
             <View className="gap-3">
-              {inCity.length ? inCity.map((m) => <MatchCard key={m.listing.id} m={m} />) : <Card><Text className="text-sm text-muted">No sample homes here. Try the Google search below.</Text></Card>}
+              {inCity.length ? inCity.map((m) => <MatchCard key={m.listing.id} m={m} rank={matches.indexOf(m) + 1} />) : <Card><Text className="text-sm text-muted">No sample homes here. Try the building search below.</Text></Card>}
               <GoogleHomes placeId={selected} kind={types.length === 1 && types[0] === 'house' ? 'house' : 'apartment'} />
-            </View>
-          </Section>
-          <Section title="Best matches overall">
-            <View className="gap-3">
-              {matches.slice(0, 8).map((m) => (
-                <MatchCard key={m.listing.id} m={m} />
-              ))}
             </View>
           </Section>
           <Card>
