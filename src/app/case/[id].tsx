@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Button, useThemeColor } from 'heroui-native';
 import { useState } from 'react';
-import { Linking, Share, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Presets } from 'react-native-pulsar';
 
@@ -13,14 +13,13 @@ import { Segmented } from '@/components/segmented';
 import { BridgeSpan } from '@/features/cases/components/bridge-span';
 import { ChoiceGroup } from '@/features/cases/components/choice-group';
 import { StatusPill } from '@/features/cases/components/status-pill';
-import { sourceById } from '@/features/cases/data/jurisdictions';
 import { DONT_KNOW, NOTICE_TYPES, REASONS } from '@/features/cases/data/questions';
 import { useCasesStore } from '@/features/cases/store/cases-store';
 import type { CheckState, NoticeFields } from '@/features/cases/types/case';
 import { computeDeadlines, formatDate } from '@/features/cases/utils/dates';
 import { runNoticeChecks } from '@/features/cases/utils/notice-checks';
 import { coverageFor, evaluate } from '@/features/cases/utils/rules-engine';
-import { buildSummary, cityName, reasonLabel } from '@/features/cases/utils/summary';
+import { cityName, reasonLabel } from '@/features/cases/utils/summary';
 import { TASK_KIND_LABEL } from '@/features/cases/utils/tasks';
 import { confirmDelete } from '@/lib/confirm';
 import { cn } from '@/lib/cn';
@@ -28,6 +27,21 @@ import { cn } from '@/lib/cn';
 type Tab = 'rights' | 'notice' | 'plan';
 
 const EMPTY_NOTICE: NoticeFields = { noticeType: '', noticeDate: '', moveOutDate: '', statedReason: '', relocationStated: '' };
+
+const NOTICE_INFO: Record<string, { title: string; body: string }> = {
+  yes: {
+    title: 'You have a written notice',
+    body: 'A written notice matters because it shows the reason, the dates and how much time you have. Add its details in the Notice tab and we will check them for you. Keep the original and the envelope, and do not ignore it.',
+  },
+  no: {
+    title: 'You have no written notice yet',
+    body: 'Without a written notice, a landlord generally cannot make you leave. Spoken requests or texts are not the same as a proper notice. Write down what was said and when, keep any messages, and check in with a tenant counselor.',
+  },
+  unknown: {
+    title: 'Not sure about a notice',
+    body: 'Look for any paper, letter or posted sheet from your landlord. If you find one, add its details in the Notice tab. If you are unsure whether something counts, ask a tenant counselor.',
+  },
+};
 
 const CHECK_LABEL: Record<CheckState, string> = {
   present: 'Found in the notice',
@@ -126,6 +140,10 @@ export default function CaseScreen() {
           <Card>
             <Text className="text-sm text-foreground">{coverage.label}</Text>
           </Card>
+          <Card>
+            <Text className="font-serif text-lg font-semibold text-foreground">{NOTICE_INFO[c.facts.hasNotice]?.title ?? NOTICE_INFO.unknown.title}</Text>
+            <Text className="text-sm text-foreground">{NOTICE_INFO[c.facts.hasNotice]?.body ?? NOTICE_INFO.unknown.body}</Text>
+          </Card>
           <Section title="What may apply to you">
             {findings.map((f) => (
               <Card key={f.ruleId}>
@@ -133,21 +151,12 @@ export default function CaseScreen() {
                 <Text className="font-serif text-lg font-semibold text-foreground">{f.title}</Text>
                 <Text className="text-sm text-foreground">{f.summary}</Text>
                 {f.unresolved.length > 0 ? (
-                  <Text className="text-sm text-muted">Still unknown: {f.unresolved.join('; ')}</Text>
+                  <Text className="text-sm text-muted">We still need to know: {f.unresolved.join('; ')}.</Text>
                 ) : null}
                 {f.exceptions.length > 0 ? (
-                  <Text className="text-sm text-muted">Exceptions can apply: {f.exceptions.join('; ')}</Text>
+                  <Text className="text-sm text-muted">It might not cover you if: {f.exceptions.join('; ').toLowerCase()}.</Text>
                 ) : null}
-                <Text className="text-sm font-semibold text-foreground">Next: {f.followUp}</Text>
-                {f.sourceIds.map((sid) => {
-                  const src = sourceById(sid);
-                  return src ? (
-                    <Pressable key={sid} onPress={() => Linking.openURL(src.url)} className="flex-row items-center gap-2">
-                      <Ionicons name="link" size={16} color={accent} />
-                      <Text className="flex-1 text-sm text-accent">{src.title}</Text>
-                    </Pressable>
-                  ) : null;
-                })}
+                <Text className="text-sm font-semibold text-foreground">A good next step: {f.followUp}</Text>
               </Card>
             ))}
           </Section>
@@ -228,14 +237,6 @@ export default function CaseScreen() {
                 <Text className="text-sm text-muted">{d.trace}</Text>
               </Card>
             ))}
-          </Section>
-          <Section title="Summary to share">
-            <Card>
-              <Text className="text-sm text-foreground">{buildSummary(c)}</Text>
-            </Card>
-            <Button size="lg" onPress={() => { pressHaptic(); Share.share({ message: buildSummary(c) }); }}>
-              <Button.Label>Share summary</Button.Label>
-            </Button>
           </Section>
           <Button variant="danger-soft" onPress={() => confirmDelete({ title: 'Delete this case?', message: 'This removes it from this phone.', onConfirm: () => { deleteCase(c.id); router.replace('/'); } })}>
             <Button.Label>Delete case</Button.Label>

@@ -1,15 +1,19 @@
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Button, useThemeColor } from 'heroui-native';
+import { Button } from 'heroui-native';
 import { ScrollView, Text, View } from 'react-native';
 
 import { Card } from '@/components/card';
 import { ListRow } from '@/components/list-row';
 import { pressHaptic } from '@/components/pressable';
 import { Section } from '@/components/section';
-import { CITIES } from '@/features/cases/data/jurisdictions';
 import { useCasesStore } from '@/features/cases/store/cases-store';
 import { reasonLabel, cityName } from '@/features/cases/utils/summary';
+
+const HOW = [
+  { title: 'Answer a few questions', body: 'Say where you live and what happened. Skip anything with “I don’t know”.' },
+  { title: 'Read what may apply', body: 'See protections in plain words, and what to ask a counselor.' },
+  { title: 'Work through your steps', body: 'Tick off tasks and watch the bridge fill as you go.' },
+];
 
 function SpanArt() {
   return (
@@ -31,7 +35,6 @@ function SpanArt() {
 export default function HomeScreen() {
   const cases = useCasesStore((s) => s.cases);
   const latest = cases[0];
-  const accent = useThemeColor('accent');
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -68,15 +71,16 @@ export default function HomeScreen() {
         ) : null}
       </View>
 
-      <Section title="Where it works">
-        <Card list>
-          {CITIES.map((c) => (
-            <ListRow
-              key={c.id}
-              title={c.name}
-              subtitle={c.note}
-              right={<Ionicons name={c.coverage === 'draft' ? 'shield-checkmark' : 'shield-outline'} size={20} color={accent} />}
-            />
+      <Section title="How to use this app">
+        <Card>
+          {HOW.map((h, i) => (
+            <View key={h.title} className="flex-row items-start gap-3">
+              <Text className="w-6 font-serif text-xl font-bold text-accent">{i + 1}</Text>
+              <View className="flex-1 gap-0.5">
+                <Text className="text-base font-semibold text-foreground">{h.title}</Text>
+                <Text className="text-sm text-muted">{h.body}</Text>
+              </View>
+            </View>
           ))}
         </Card>
       </Section>
@@ -84,7 +88,7 @@ export default function HomeScreen() {
       <Card>
         <Text className="text-base font-semibold text-foreground">Information, not legal advice</Text>
         <Text className="text-sm text-muted">
-          BridgeRights is not a lawyer or a court. Rules shown are drafts waiting for review by a legal professional, and a result never says you will or will not win. You can answer “I don’t know” to anything, and no documents are uploaded: everything stays on your phone.
+          BridgeRights is not a lawyer or a court, and it never says you will or will not win. Everything stays on your phone.
         </Text>
       </Card>
 
