@@ -138,11 +138,11 @@ export default function CaseScreen() {
             </Card>
           ) : null}
           <Card>
-            <Text className="text-sm text-foreground">{coverage.label}</Text>
-          </Card>
-          <Card>
             <Text className="font-serif text-lg font-semibold text-foreground">{NOTICE_INFO[c.facts.hasNotice]?.title ?? NOTICE_INFO.unknown.title}</Text>
             <Text className="text-sm text-foreground">{NOTICE_INFO[c.facts.hasNotice]?.body ?? NOTICE_INFO.unknown.body}</Text>
+          </Card>
+          <Card>
+            <Text className="text-sm text-foreground">{coverage.label}</Text>
           </Card>
           <Section title="What may apply to you">
             {findings.map((f) => (
@@ -154,7 +154,7 @@ export default function CaseScreen() {
                   <Text className="text-sm text-muted">We still need to know: {f.unresolved.join('; ')}.</Text>
                 ) : null}
                 {f.exceptions.length > 0 ? (
-                  <Text className="text-sm text-muted">It might not cover you if: {f.exceptions.join('; ').toLowerCase()}.</Text>
+                  <Text className="text-sm text-muted">It might not cover you if: {f.exceptions.join('; ')}.</Text>
                 ) : null}
                 <Text className="text-sm font-semibold text-foreground">A good next step: {f.followUp}</Text>
               </Card>

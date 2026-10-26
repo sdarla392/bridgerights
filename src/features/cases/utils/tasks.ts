@@ -12,7 +12,7 @@ export const TASK_KIND_LABEL = {
 export function generateTasks(facts: Facts, existing: Task[] = []): Task[] {
   const tasks: Task[] = [];
   const findings = evaluate(facts).filter((f) => f.applicability !== 'not_applicable');
-  tasks.push({ id: 'review-results', kind: 'review', title: 'Read your rights summary', detail: 'Go through each protection and its sources. Nothing here is a final answer.', done: false });
+  tasks.push({ id: 'review-results', kind: 'review', title: 'Read your rights summary', detail: 'Read through each protection and the questions to ask. Nothing here is a final answer.', done: false });
   if (facts.hasNotice !== 'no') tasks.push({ id: 'gather-notice', kind: 'gather', title: 'Keep the notice safe', detail: 'Photograph every page and note the date and how you received it (hand, mail, posted).', done: false });
   tasks.push({ id: 'gather-lease', kind: 'gather', title: 'Collect rent receipts and your lease', detail: 'Only what you already have. You do not need to share more than you want to.', done: false });
   for (const f of findings.slice(0, 3)) {
