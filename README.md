@@ -1,39 +1,98 @@
-# Newly app
+# BridgeRights
 
-A native-feeling Expo (React Native) app built with the newly design system:
-**HeroUI Native** components, **Uniwind** (Tailwind v4) styling, a locked **design
-token** set, and **Zustand + MMKV** for local-first state.
+BridgeRights is a mobile application built with Expo and React Native to help tenants in Santa Clara County understand their rights, track housing-related cases, and explore housing options.
 
-## Get started
+## Features
+
+### Tenant Rights Checker
+- Evaluates user-provided case details against California and applicable Santa Clara County city-specific tenant-rights rules.
+- Distinguishes potentially applicable rules, conditional results, and situations with insufficient information.
+- Flags court-related situations for professional review instead of presenting automated results as definitive legal advice.
+
+### Case Tracking
+- Organizes case facts, notice details, task checklists, and creation and update timestamps.
+- Saves case data locally so records and checklist updates persist after the app closes.
+- Requests confirmation before deleting a case.
+
+### Housing Listings
+- Provides a housing-discovery interface to help renters explore available housing options.
+- Complements tenant-rights resources with a way to look for potential next housing options.
+
+## Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| Expo + React Native | Cross-platform mobile application |
+| TypeScript | Application logic and type definitions |
+| Zustand | Application state management |
+| MMKV | Persistent on-device storage |
+| HeroUI Native | Reusable native-feeling UI components |
+| Uniwind | Tailwind CSS v4 styling for React Native |
+
+## Data and Privacy
+
+Case tracking uses a local-first architecture. Zustand manages application state, while MMKV persists case data on the device. Case records are not uploaded to a remote server or synchronized between devices.
+
+The Rights Checker evaluates case information locally using application rules. Automated results are informational and do not replace advice from a qualified legal professional.
+
+## Getting Started
+
+### Prerequisites
+- Bun
+- Node.js, as required by the project environment
+- Xcode for iOS development on macOS, or an Android development environment for Android
+
+### Installation
 
 ```bash
 bun install
-bun run ios       # or: bun run android / bun run web
 ```
 
-## Where things live
-
-```
-src/
-├── app/              Expo Router routes — every .tsx here is a screen
-├── components/       Scaffold primitives (Section, Card, ListRow, Segmented, …)
-├── features/<f>/     Domain modules: components/ hooks/ store/ utils/ types/
-├── hooks/            Cross-feature hooks
-├── lib/              motion.ts · confirm.ts · storage.ts · cn.ts
-└── constants/        theme.ts (native fallback palette)
-design/               DESIGN.md + dials.json — the locked visual identity
-rules/                Coding rules — read the matching rule before writing code
-```
-
-The app's look is driven by the tokens in `src/global.css` and the dials in
-`design/dials.json` — change the look by editing tokens, never one screen at a time.
-
-## Checks
+### Run the Application
 
 ```bash
-bun run typecheck     # TypeScript
-bun run lint:slop     # design-system lint (tokens only, primitives, motion rules)
+bun run ios
+bun run android
+bun run web
 ```
 
-`AGENTS.md` is the entry point for AI agents working in this repo — it links every
-rule in `rules/` and the design docs in `design/`.
+Run the command for your target platform.
+
+## Project Structure
+
+```text
+src/
+├── app/              # Expo Router screens and navigation
+├── components/       # Reusable UI components
+├── features/         # Feature-specific components, logic, and state
+│   └── <feature>/
+│       ├── components/
+│       ├── hooks/
+│       ├── store/
+│       ├── utils/
+│       └── types/
+├── hooks/            # Shared React hooks
+├── lib/              # Shared utilities and storage helpers
+└── constants/        # Theme and fallback palette
+
+design/               # Design documentation and design tokens
+rules/                # Project coding and design-system rules
+```
+
+## Development Checks
+
+Run the project's available checks before submitting changes:
+
+```bash
+bun run typecheck
+bun run lint:slop
+```
+
+- `typecheck` checks for TypeScript errors.
+- `lint:slop` checks compliance with the project's design-system conventions.
+
+## Design System
+
+The application's visual styling is based on shared design tokens and configuration. Refer to `src/global.css`, `design/dials.json`, and `design/DESIGN.md` when making visual changes.
+
+`AGENTS.md` documents the project-specific development instructions and links to relevant design and coding rules.
